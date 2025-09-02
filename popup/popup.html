@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focused Todo</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🎯 Focused Todo</h1>
+            <div class="toggle-container">
+                <label class="toggle-label">Blocking</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="blockingToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </header>
+
+        <!-- Blocking Notification -->
+        <div class="blocking-notification" id="blockingNotification" style="display: none;">
+            <div class="notification-content">
+                <div class="notification-icon">🚫</div>
+                <div class="notification-text">
+                    <h3>Site Blocked!</h3>
+                    <p>Complete your todos to access blocked sites</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="todos">Todo List</button>
+            <button class="tab-btn" data-tab="blocked">Blocked Sites</button>
+        </div>
+
+        <!-- Todo List Tab -->
+        <div class="tab-content active" id="todos-tab">
+            <div class="add-todo-section">
+                <div class="input-group">
+                    <input type="text" id="todoInput" placeholder="Add a new todo item..." maxlength="100">
+                    <button id="addTodoBtn" class="btn btn-primary">Add</button>
+                </div>
+                <div class="recurring-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="recurringCheck">
+                        <span class="checkmark"></span>
+                        Recurring
+                    </label>
+                    <select id="recurringType" disabled>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="todo-list" id="todoList">
+                <!-- Todo items will be dynamically added here -->
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span class="progress-text" id="progressText">0 of 0 completed</span>
+            </div>
+        </div>
+
+        <!-- Blocked Sites Tab -->
+        <div class="tab-content" id="blocked-tab">
+            <div class="add-url-section">
+                <div class="input-group">
+                    <input type="text" id="urlInput" placeholder="Enter URL or domain (e.g., facebook.com)" maxlength="200">
+                    <button id="addUrlBtn" class="btn btn-primary">Block</button>
+                </div>
+            </div>
+
+            <div class="blocked-urls-list" id="blockedUrlsList">
+                <!-- Blocked URLs will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
