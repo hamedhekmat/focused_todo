@@ -29,11 +29,8 @@ function UrlBlockList() {
   const addUrl = () => {
     if (newUrl.trim() === '') return;
     
-    // Normalize URL - add https:// if no protocol specified
-    let urlToAdd = newUrl.trim();
-    if (!urlToAdd.startsWith('http://') && !urlToAdd.startsWith('https://')) {
-      urlToAdd = 'https://' + urlToAdd;
-    }
+    // Store exactly what the user enters (substring matching)
+    const urlToAdd = newUrl.trim();
     
     // Check if URL already exists
     if (!blockedUrls.includes(urlToAdd)) {
@@ -62,7 +59,7 @@ function UrlBlockList() {
         <input
           type="text"
           className="url-input"
-          placeholder="Enter URL to block (e.g., facebook.com or https://twitter.com)"
+          placeholder="Enter URL to block (e.g., youtube.com, facebook.com)"
           value={newUrl}
           onChange={(e) => setNewUrl(e.target.value)}
           onKeyPress={handleKeyPress}

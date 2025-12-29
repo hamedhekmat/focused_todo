@@ -3,51 +3,39 @@
 const REDIRECT_RULE_ID = 1;
 const extensionUrl = chrome.runtime.getURL('index.html');
 
-// Convert blocked URLs to declarativeNetRequest rules
+// Convert blocked URLs to declarativeNetRequest rules using substring matching
 function createRules(blockedUrls) {
   const rules = [];
   
   blockedUrls.forEach((blockedUrl, index) => {
-    try {
-      const url = new URL(blockedUrl);
-      const hostname = url.hostname;
-      
-      rules.push({
-        id: REDIRECT_RULE_ID + index,
-        priority: 1,
-        action: {
-          type: 'redirect',
-          redirect: { url: extensionUrl }
-        },
-        condition: {
-          urlFilter: `*://${hostname}/*`,
-          resourceTypes: ['main_frame']
-        }
-      });
-    } catch (e) {
-      // If blockedUrl is not a full URL, treat it as a domain pattern
-      rules.push({
-        id: REDIRECT_RULE_ID + index,
-        priority: 1,
-        action: {
-          type: 'redirect',
-          redirect: { url: extensionUrl }
-        },
-        condition: {
-          urlFilter: `*://*${blockedUrl}/*`,
-          resourceTypes: ['main_frame']
-        }
-      });
-    }
+    // Use substring matching - any URL containing the blocked substring will be blocked
+    // Pattern: *://*substring* matches any URL containing the substring
+    rules.push({
+      id: REDIRECT_RULE_ID + index,
+      priority: 1,
+      action: {
+        type: 'redirect',
+        redirect: { url: extensionUrl }
+      },
+      condition: {
+        urlFilter: `*://*${blockedUrl}*`,
+        resourceTypes: ['main_frame']
+      }
+    });
   });
   
   return rules;
 }
 
 // Update declarativeNetRequest rules based on blocked URLs
+// Only block URLs if there are incomplete todos
 async function updateBlockingRules() {
-  const result = await chrome.storage.local.get(['blockedUrls']);
+  const result = await chrome.storage.local.get(['blockedUrls', 'todos']);
   const blockedUrls = result.blockedUrls || [];
+  const todos = result.todos || [];
+  
+  // Check if there are any incomplete todos
+  const hasIncompleteTodos = todos.some(todo => !todo.completed);
   
   // Remove all existing rules
   try {
@@ -62,8 +50,8 @@ async function updateBlockingRules() {
     console.log('No existing rules to remove');
   }
   
-  // Add new rules if there are blocked URLs
-  if (blockedUrls.length > 0) {
+  // Only add blocking rules if there are incomplete todos AND blocked URLs
+  if (hasIncompleteTodos && blockedUrls.length > 0) {
     const rules = createRules(blockedUrls);
     try {
       await chrome.declarativeNetRequest.updateDynamicRules({
@@ -92,8 +80,9 @@ chrome.runtime.onInstalled.addListener(() => {
 updateBlockingRules();
 
 // Listen for storage changes to update rules
+// Update when blocked URLs change OR when todos change (completion status)
 chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName === 'local' && changes.blockedUrls) {
+  if (areaName === 'local' && (changes.blockedUrls || changes.todos)) {
     updateBlockingRules();
   }
 });
